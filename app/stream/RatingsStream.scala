@@ -16,10 +16,12 @@ class RatingsStream @Inject()(ws: WSClient,
                               redisStoreClient: RedisStoreClient)
                              (implicit ec: ExecutionContext,
                               mat: Materializer) {
+  private val url = "http://localhost:3020/ratings"
+
   streamRatingsToRedis()
 
   def streamRatingsToRedis(): Unit = {
-    ws.url("http://localhost:3020/ratings").withMethod("GET").stream().foreach { response =>
+    ws.url(url).withMethod("GET").stream().foreach { response =>
       val sink = Sink.foreach[ByteString] { bytes =>
         val maybeRating = decodeRatingMessage(bytes)
         println(bytes.map(_.toChar).mkString.substring(6))
