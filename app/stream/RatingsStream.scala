@@ -19,34 +19,28 @@ class RatingsStream @Inject()(ws: WSClient,
                               mat: Materializer,
                               configuration: Configuration) {
 
-  private def getUrl = {
-    val maybeBaseUrl = Try(configuration.get[String]("rating.stream.baseUrl")).toOption
-    val maybeMethod = Try(configuration.get[String]("rating.stream.method")).toOption
+  private def getUrl: String = {
+    val baseUrl = configuration.get[String]("rating.stream.baseUrl")
+    val method = configuration.get[String]("rating.stream.method")
 
-    for {
-      baseUrl <- maybeBaseUrl
-      method <- maybeMethod
-    } yield s"$baseUrl/$method"
+    s"$baseUrl/$method"
   }
 
-  private val maybeUrl = getUrl
+  private val url = getUrl
 
   streamRatingsToRedis()
 
   def streamRatingsToRedis(): Unit = {
+    ws.url(url).withMethod("GET").stream().foreach { response =>
+      val sink = Sink.foreach[ByteString] { bytes =>
+        val maybeRating = decodeRatingMessage(bytes)
+        println(bytes.map(_.toChar).mkString.substring(6))
+        maybeRating.foreach(rating => redisStoreClient.addToAvgSortedSet(rating))
+      }
 
-    maybeUrl.foreach { url =>
-      ws.url(url).withMethod("GET").stream().foreach { response =>
-        val sink = Sink.foreach[ByteString] { bytes =>
-          val maybeRating = decodeRatingMessage(bytes)
-          println(bytes.map(_.toChar).mkString.substring(6))
-          maybeRating.foreach(rating => redisStoreClient.addToAvgSortedSet(rating))
-        }
-
-        response.bodyAsSource.runWith(sink).andThen {
-          case result =>
-            result.get
-        }
+      response.bodyAsSource.runWith(sink).andThen {
+        case result =>
+          result.get
       }
     }
   }
