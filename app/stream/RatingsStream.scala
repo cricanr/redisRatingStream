@@ -6,6 +6,7 @@ import akka.util.ByteString
 import com.google.inject.{Inject, Singleton}
 import models.Rating
 import models.Rating._
+import play.api.Configuration
 import play.api.libs.ws.WSClient
 
 import scala.concurrent.ExecutionContext
@@ -15,22 +16,37 @@ import scala.util.Try
 class RatingsStream @Inject()(ws: WSClient,
                               redisStoreClient: RedisStoreClient)
                              (implicit ec: ExecutionContext,
-                              mat: Materializer) {
-  private val url = "http://localhost:3020/ratings"
+                              mat: Materializer,
+                              configuration: Configuration) {
+
+  private def getUrl = {
+    val maybeBaseUrl = Try(configuration.get[String]("rating.stream.baseUrl")).toOption
+    val maybeMethod = Try(configuration.get[String]("rating.stream.method")).toOption
+
+    for {
+      baseUrl <- maybeBaseUrl
+      method <- maybeMethod
+    } yield s"$baseUrl/$method"
+  }
+
+  private val maybeUrl = getUrl
 
   streamRatingsToRedis()
 
   def streamRatingsToRedis(): Unit = {
-    ws.url(url).withMethod("GET").stream().foreach { response =>
-      val sink = Sink.foreach[ByteString] { bytes =>
-        val maybeRating = decodeRatingMessage(bytes)
-        println(bytes.map(_.toChar).mkString.substring(6))
-        maybeRating.foreach(rating => redisStoreClient.addToAvgSortedSet(rating))
-      }
 
-      response.bodyAsSource.runWith(sink).andThen {
-        case result =>
-          result.get
+    maybeUrl.foreach { url =>
+      ws.url(url).withMethod("GET").stream().foreach { response =>
+        val sink = Sink.foreach[ByteString] { bytes =>
+          val maybeRating = decodeRatingMessage(bytes)
+          println(bytes.map(_.toChar).mkString.substring(6))
+          maybeRating.foreach(rating => redisStoreClient.addToAvgSortedSet(rating))
+        }
+
+        response.bodyAsSource.runWith(sink).andThen {
+          case result =>
+            result.get
+        }
       }
     }
   }
