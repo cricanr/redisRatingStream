@@ -1,6 +1,7 @@
 package stream
 
 import com.google.inject.Inject
+import com.redis.RedisClient
 import com.redis.RedisClient.{ASC, SortOrder}
 import models.Rating.decodeRating
 import models.{Rating, RatingAverage}
@@ -15,12 +16,9 @@ trait IStoreClient {
   def ratingAverage(movieId: Int): RatingAverage
 }
 
-class RedisStoreClient @Inject() extends IStoreClient {
-
-  import com.redis._
+class RedisStoreClient @Inject()(redisClient: RedisClient) extends IStoreClient {
 
   private val ratingsRedisSortedList = "ratingsAvg2"
-  private val redisClient = new RedisClient("localhost", 6379)
 
   private def formatRating(ratingId: Int, rating: Float) = s"""{"id":$ratingId,"rating":$rating}"""
   private def ratingAvgLines(movieId: Int): List[String] = getRatingAvgLines(movieId: Int)
