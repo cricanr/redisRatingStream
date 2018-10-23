@@ -1,6 +1,7 @@
 import java.time.Clock
 
 import com.google.inject.AbstractModule
+import com.redis.RedisClient
 import stream.{IStoreClient, RatingsStream, RedisStoreClient}
 
 /**
