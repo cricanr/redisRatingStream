@@ -4,6 +4,8 @@ version: "3.7"
 services:
   app:
     build: ./
+    links:
+      - 'redis'
     depends_on:
       - redis
     environment:
@@ -17,5 +19,6 @@ services:
       - 6379
     ports:
       - 6379:6379
+
 volumes:
   redis_data:
