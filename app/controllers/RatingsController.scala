@@ -28,4 +28,10 @@ class RatingsController @Inject()(cc: ControllerComponents,
 
     Future.successful(Ok(ratingAverageInfo.asJson.toString))
   }
+
+  def ratingInfos(queryParams: String): Action[AnyContent] = Action.async { _ =>
+
+
+    Future.successful(Ok("cat miau"))
+  }
 }
