@@ -13,7 +13,7 @@ services:
       - redis
     ports:
       - 9000:9443
-    command: [" /svc/bin/start -Dhttps.port=9443 -Dredis.ip=${REDIS_IP} -Dplay.crypto.secret=secret"]
+    command: /svc/bin/start -Dhttps.port=9443 -Dredis.ip="$REDIS_IP" -Dplay.crypto.secret=secret
 
   redis:
     image: redis
