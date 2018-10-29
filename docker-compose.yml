@@ -7,14 +7,13 @@ services:
     environment:
       - REDIS_HOST=redis
       - RHOST=redis
-      - REDIS_IP="172.28.0.2"
     networks:
       - redis-net
     depends_on:
       - redis
     ports:
       - 9000:9443
-    command: [" /svc/bin/start -Dhttps.port=9443 -Dredis.ip=REDIS_IP -Dplay.crypto.secret=secret"]
+    command: [" /svc/bin/start -Dhttps.port=9443 -Dredis.ip=${REDIS_IP} -Dplay.crypto.secret=secret"]
 
   redis:
     image: redis
