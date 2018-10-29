@@ -6,6 +6,7 @@ import akka.util.ByteString
 import com.google.inject.{Inject, Singleton}
 import models.Rating
 import models.Rating._
+import play.api.Configuration
 import play.api.libs.ws.WSClient
 
 import scala.concurrent.ExecutionContext
@@ -15,8 +16,17 @@ import scala.util.Try
 class RatingsStream @Inject()(ws: WSClient,
                               redisStoreClient: RedisStoreClient)
                              (implicit ec: ExecutionContext,
-                              mat: Materializer) {
-  private val url = "http://localhost:3020/ratings"
+                              mat: Materializer,
+                              configuration: Configuration) {
+
+  private def getUrl: String = {
+    val baseUrl = configuration.get[String]("rating.stream.baseUrl")
+    val method = configuration.get[String]("rating.stream.method")
+
+    s"$baseUrl/$method"
+  }
+
+  private val url = getUrl
 
   streamRatingsToRedis()
 

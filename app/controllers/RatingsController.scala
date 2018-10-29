@@ -11,11 +11,11 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class RatingsController @Inject()(cc: ControllerComponents,
                                   actorSystem: ActorSystem,
-                                  ratingStats: RatingStats)
+                                  ratingStats: RatingStats,
+                                  redisStoreClient: RedisStoreClient)
                                  (implicit exec: ExecutionContext) extends AbstractController(cc) {
   def ratingInfo(movieId: Int): Action[AnyContent] = Action.async { _ =>
-    val redisHandler = new RedisStoreClient
-    val median = redisHandler.getMedian
+    val median = redisStoreClient.getMedian
 
     val ratingAverage = ratingStats.ratingAverage(movieId)
     val isBellowMedianAvgRating = ratingStats.isBellowMedianAverageRating(movieId)

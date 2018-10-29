@@ -1,9 +1,11 @@
 package stream
 
 import com.google.inject.Inject
+import com.redis.RedisClient
 import com.redis.RedisClient.{ASC, SortOrder}
 import models.Rating.decodeRating
 import models.{Rating, RatingAverage}
+import play.api.Configuration
 
 trait IStoreClient {
   def addToAvgSortedSet(rating: Rating): Unit
@@ -15,15 +17,16 @@ trait IStoreClient {
   def ratingAverage(movieId: Int): RatingAverage
 }
 
-class RedisStoreClient @Inject() extends IStoreClient {
+class RedisStoreClient @Inject()(redisClient: RedisClient)
+                                (implicit configuration: Configuration)
+  extends IStoreClient {
 
-  import com.redis._
-
-  private val ratingsRedisSortedList = "ratingsAvg2"
-  private val redisClient = new RedisClient("localhost", 6379)
+  private val ratingsRedisSortedList = configuration.get[String]("redis.ratingsSortedList")
 
   private def formatRating(ratingId: Int, rating: Float) = s"""{"id":$ratingId,"rating":$rating}"""
+
   private def ratingAvgLines(movieId: Int): List[String] = getRatingAvgLines(movieId: Int)
+
   private def getRatingAvgLines(id: Int): List[String] = {
     redisClient.zscan(ratingsRedisSortedList, 0, s"""{*id*:$id,*rating*}""", count = 1000000000).flatMap(res => res._2) match {
       case Some(value) =>
