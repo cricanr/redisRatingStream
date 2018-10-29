@@ -36,6 +36,8 @@ class RedisStoreClient @Inject()(redisClient: RedisClient)
     }
   }
 
+  val myParameterOrdefaultValue = myParameterOrdefaultValue.map(val => println(s"param: $val")
+
   def ratingAverage(movieId: Int): RatingAverage = {
     val ratingAvgLinesUnfiltered = ratingAvgLines(movieId)
 
