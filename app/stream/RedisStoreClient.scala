@@ -17,9 +17,18 @@ trait IStoreClient {
   def ratingAverage(movieId: Int): RatingAverage
 }
 
-class RedisStoreClient @Inject()(redisClient: RedisClient)
+// TODO: Add back DI RedisClient, need to configure to use RedisClient with custom constructor (IP, PORT)
+// FOR now using new operator to try it works
+class RedisStoreClient @Inject()
                                 (implicit configuration: Configuration)
   extends IStoreClient {
+  private def getRedisIpParam=  {
+    Option(System.getProperty("redis.ip")).getOrElse("172.28.0.2")
+  }
+
+  println(s"param: ${System.getProperty("redis.ip")}")
+
+  private val redisClient: RedisClient = new RedisClient(getRedisIpParam, port = 6379)
 
   private val ratingsRedisSortedList = configuration.get[String]("redis.ratingsSortedList")
 
@@ -35,8 +44,6 @@ class RedisStoreClient @Inject()(redisClient: RedisClient)
         List.empty
     }
   }
-
-  val myParameterOrdefaultValue = myParameterOrdefaultValue.map(val => println(s"param: $val")
 
   def ratingAverage(movieId: Int): RatingAverage = {
     val ratingAvgLinesUnfiltered = ratingAvgLines(movieId)
