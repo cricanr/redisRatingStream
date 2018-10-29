@@ -10,8 +10,8 @@ ENV PATH ${PATH}:${SBT_HOME}/bin
 
 COPY svc /svc
 
-CMD /svc/bin/start -Dhttps.port=9443 -Dplay.crypto.secret=secret
-#CMD sleep infinity
+#CMD /svc/bin/start -Dhttps.port=9443 -Dplay.crypto.secret=secret
+CMD sleep infinity
 
 #FROM openjdk:8-jre
 #
