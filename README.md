@@ -62,7 +62,10 @@ sbt run
 set -x && unzip -d svc target/universal/*-1.0-SNAPSHOT.zip && mv svc/*/* svc/ && rm svc/bin/*.bat && mv svc/bin/* svc/bin/star
 ```
 
-1) Create docker-compose.yml ([click here](https://docs.docker.com/compose/compose-file/compose-versioning/))
+2) Create .env file based on example .env.dist
+ do not commit in the repository the file .env ; update the .gitignore 
+ 
+3) Create docker-compose.yml ([click here](https://docs.docker.com/compose/compose-file/compose-versioning/))
 ```yaml
 version: "3.3"
 services:
@@ -97,13 +100,13 @@ volumes:
   redis-data:
 
 ```
-1) Create Dockerfile
+5) Create Dockerfile
 ```yaml
 ENV PATH ${PATH}:${SBT_HOME}/bin
 
 COPY svc /svc
 ```
-1) Start dependencies (downstream services) first:
+6) Start dependencies (downstream services) first:
 ```bash
 docker-compose up --force-recreate --build
 ```
@@ -111,7 +114,7 @@ docker-compose up --force-recreate --build
 --force-recreate => will remove cache
 up => docker-compose.yml then Dockerfile
 
-1) Run in Chrome: http://localhost:9000/ratingInfo/364689 (or another movieId) and you should get something like this: 
+7) Run in Chrome: http://localhost:9000/ratingInfo/364689 (or another movieId) and you should get something like this: 
 ```{
    "ratingAverage": {
         "id": 364689,
