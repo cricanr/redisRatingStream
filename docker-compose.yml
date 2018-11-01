@@ -12,7 +12,8 @@ services:
     depends_on:
       - redis
     ports:
-      - 9000:9443
+      - 9000:9000
+      - 9443:9443
     command: /svc/bin/start -Dhttps.port=9443 -Dredis.ip="$REDIS_IP" -Dplay.crypto.secret=secret
 
   redis:
