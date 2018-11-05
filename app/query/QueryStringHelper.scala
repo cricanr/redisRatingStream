@@ -17,7 +17,7 @@ object QueryStringHelper {
           if (movieIdsStr.exists(paramName => paramName.equals("movieIds"))) {
             val maybeMovieIds = Try(movieIdsParams(1).split(",")).toOption.map(_.map(_.toInt))
             val maybeLimitParam = Try(paramStr(1)).toOption
-            maybeLimitParam.flatMap { limitParam =>
+            maybeLimitParam.map { limitParam =>
               val maybeLimitParams = Try(limitParam.split('=')).toOption
               maybeLimitParams.flatMap { limitParams =>
                 val limitParamKey = limitParams.headOption
@@ -28,9 +28,10 @@ object QueryStringHelper {
                     limitParamValue <- maybeLimitParamValue
                   } yield RatingInfosRequest(movieIds.toSeq, limitParamValue)
                 }
-                maybeMovieIds.map(movieIds => RatingInfosRequest(movieIds.toSeq, 5))
+                else
+                  maybeMovieIds.map(movieIds => RatingInfosRequest(movieIds.toSeq, 5))
               }
-            }
+            }.getOrElse(maybeMovieIds.map(movieIds => RatingInfosRequest(movieIds.toSeq, 5)))
           }
           else None
         }
