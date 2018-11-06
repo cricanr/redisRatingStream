@@ -8,7 +8,7 @@ object QueryStringHelper {
   def parseQueryParams(queryParams: String): Option[RatingInfosRequest] = {
     val paramsStr = normalizeQueryParams(queryParams)
     val maybeMovieIdsParam = parseMovieIdsParam(paramsStr)
-    val limitParam = parseLimitParam(paramsStr, limitDefault = 5)
+    val limitParam = parseLimitParam(paramsStr, limitDefault = 100)
 
     maybeMovieIdsParam.map(movieIdsParam => RatingInfosRequest(movieIdsParam, limitParam))
   }

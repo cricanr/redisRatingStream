@@ -15,7 +15,7 @@ class QueryStringHelperTest extends WordSpec with MustMatchers {
     "calling parseQueryParams with movieIds and no limit" should {
       "return a valid RatingInfosRequest with default limit = 5" in {
         val queryParams = "?movieIds=68,23"
-        QueryStringHelper.parseQueryParams(queryParams) mustBe Some(RatingInfosRequest(Seq(68, 23), 5))
+        QueryStringHelper.parseQueryParams(queryParams) mustBe Some(RatingInfosRequest(Seq(68, 23), 100))
       }
     }
 
@@ -36,14 +36,14 @@ class QueryStringHelperTest extends WordSpec with MustMatchers {
     "calling parseQueryParams with invalid query parameters and known parameter movieIds" should {
       "return a RatingInfosRequest with movieIds and default limit" in {
         val queryParams = "?movieIds=23&cat=Tom"
-        QueryStringHelper.parseQueryParams(queryParams) mustBe Some(RatingInfosRequest(Seq(23), 5))
+        QueryStringHelper.parseQueryParams(queryParams) mustBe Some(RatingInfosRequest(Seq(23), 100))
       }
     }
 
-    "calling parseQueryParams with vakud query parameters in different order" should {
+    "calling parseQueryParams with valid query parameters in different order" should {
       "return a valid RatingInfosRequest with movieIds " in {
         val queryParams = "?cat=Tom&movieIds=23"
-        QueryStringHelper.parseQueryParams(queryParams) mustBe Some(RatingInfosRequest(Seq(23), 5))
+        QueryStringHelper.parseQueryParams(queryParams) mustBe Some(RatingInfosRequest(Seq(23), 100))
       }
     }
   }
