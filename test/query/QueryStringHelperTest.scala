@@ -34,7 +34,7 @@ class QueryStringHelperTest extends WordSpec with MustMatchers {
     }
 
     "calling parseQueryParams with invalid query parameters and known parameter movieIds" should {
-      "return a RatingInfosRequest with movieIds and default limit" ignore {
+      "return a RatingInfosRequest with movieIds and default limit" in {
         val queryParams = "?movieIds=23&cat=Tom"
         QueryStringHelper.parseQueryParams(queryParams) mustBe Some(RatingInfosRequest(Seq(23), 5))
       }

@@ -7,33 +7,22 @@ import scala.util.Try
 object QueryStringHelper {
   def parseQueryParams(queryParams: String): Option[RatingInfosRequest] = {
     val paramsStr = normalizeQueryParams(queryParams)
-    val maybeMovieIdsStr = paramsStr.headOption
-    maybeMovieIdsStr.flatMap { movieIdsStr =>
+    val maybeMovieIdsParam = paramsStr.find(param => param.contains("movieIds")).map { movieIdsStr =>
       val maybeMovieIdsParams = Try(movieIdsStr.split("=")).toOption
       maybeMovieIdsParams.flatMap { movieIdsParams =>
-        val movieIdsStr = movieIdsParams.headOption
-        if (movieIdsStr.exists(paramName => paramName.equals("movieIds"))) {
-          val maybeMovieIds = Try(movieIdsParams(1).split(",")).toOption.map(_.map(_.toInt))
-          val maybeLimitParam = Try(paramsStr(1)).toOption
-          maybeLimitParam.map { limitParam =>
-            val maybeLimitParams = Try(limitParam.split('=')).toOption
-            maybeLimitParams.flatMap { limitParams =>
-              val limitParamKey = limitParams.headOption
-              if (limitParamKey.exists(paramName => paramName.equals("limit"))) {
-                val maybeLimitParamValue = Try(limitParams(1).toInt).toOption
-                for {
-                  movieIds <- maybeMovieIds
-                  limitParamValue <- maybeLimitParamValue
-                } yield RatingInfosRequest(movieIds.toSeq, limitParamValue)
-              }
-              else
-                maybeMovieIds.map(movieIds => RatingInfosRequest(movieIds.toSeq, 5))
-            }
-          }.getOrElse(maybeMovieIds.map(movieIds => RatingInfosRequest(movieIds.toSeq, 5)))
-        }
-        else None
-      }
+        Try(movieIdsParams(1).split(",")).toOption.map(_.map(_.toInt).toSeq)
+      }.getOrElse(Seq.empty)
     }
+
+    val limitDefault = 5
+    val limitParam = paramsStr.find(param => param.contains("limit")).map { limitStr =>
+      val maybeLimitParams = Try(limitStr.split('=')).toOption
+      maybeLimitParams.flatMap { limitParams =>
+        Try(limitParams(1).toInt).toOption
+      }.getOrElse(limitDefault)
+    }.getOrElse(limitDefault)
+
+    maybeMovieIdsParam.map(movieIdsParam => RatingInfosRequest(movieIdsParam, limitParam))
   }
 
   private def normalizeQueryParams(queryParams: String): Seq[String] = {
