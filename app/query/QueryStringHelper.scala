@@ -7,22 +7,28 @@ import scala.util.Try
 object QueryStringHelper {
   def parseQueryParams(queryParams: String): Option[RatingInfosRequest] = {
     val paramsStr = normalizeQueryParams(queryParams)
-    val maybeMovieIdsParam = paramsStr.find(param => param.contains("movieIds")).map { movieIdsStr =>
-      val maybeMovieIdsParams = Try(movieIdsStr.split("=")).toOption
-      maybeMovieIdsParams.flatMap { movieIdsParams =>
-        Try(movieIdsParams(1).split(",")).toOption.map(_.map(_.toInt).toSeq)
-      }.getOrElse(Seq.empty)
-    }
+    val maybeMovieIdsParam = parseMovieIdsParam(paramsStr)
+    val limitParam = parseLimitParam(paramsStr, limitDefault = 5)
 
-    val limitDefault = 5
-    val limitParam = paramsStr.find(param => param.contains("limit")).map { limitStr =>
+    maybeMovieIdsParam.map(movieIdsParam => RatingInfosRequest(movieIdsParam, limitParam))
+  }
+
+  private def parseLimitParam(paramsStr: Seq[String], limitDefault: Int) = {
+    paramsStr.find(param => param.contains("limit")).map { limitStr =>
       val maybeLimitParams = Try(limitStr.split('=')).toOption
       maybeLimitParams.flatMap { limitParams =>
         Try(limitParams(1).toInt).toOption
       }.getOrElse(limitDefault)
     }.getOrElse(limitDefault)
+  }
 
-    maybeMovieIdsParam.map(movieIdsParam => RatingInfosRequest(movieIdsParam, limitParam))
+  private def parseMovieIdsParam(paramsStr: Seq[String]) = {
+    paramsStr.find(param => param.contains("movieIds")).map { movieIdsStr =>
+      val maybeMovieIdsParams = Try(movieIdsStr.split("=")).toOption
+      maybeMovieIdsParams.flatMap { movieIdsParams =>
+        Try(movieIdsParams(1).split(",")).toOption.map(_.map(_.toInt).toSeq)
+      }.getOrElse(Seq.empty)
+    }
   }
 
   private def normalizeQueryParams(queryParams: String): Seq[String] = {
