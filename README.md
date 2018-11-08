@@ -133,6 +133,27 @@ up => docker-compose.yml then Dockerfile
    }
 ```
 
+Or
+
+http://localhost:9000/ratingInfos/movieIds=680,23&limit=300
+Output: 
+```[
+   {
+   "ratingAverage": {
+   "id": 680,
+   "ratingAverage": 5.129987
+   },
+   "isBellowMedianAverage": false
+   },
+   {
+   "ratingAverage": {
+   "id": 23,
+   "ratingAverage": -1
+   },
+   "isBellowMedianAverage": true
+   }
+   ]```
+   
 Voila! Your app runs correctly!
 
 You can also run and debug using IntelliJ if you want.

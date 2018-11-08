@@ -23,7 +23,8 @@ libraryDependencies ++= Seq( jdbc , ehcache , ws , specs2 % Test , guice,
   "io.circe" %% "circe-generic" % circeVersion,
   "io.circe" %% "circe-parser" % circeVersion,
   "com.typesafe.akka" %% "akka-testkit" % "2.5.13" % Test,
-  "net.debasishg" %% "redisclient" % "3.7"
+  "net.debasishg" %% "redisclient" % "3.7",
+  "org.scalatest" %% "scalatest" % "3.0.5" % Test
 )
 
 unmanagedResourceDirectories in Test <+=  baseDirectory ( _ /"target/web/public/test" )

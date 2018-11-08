@@ -5,6 +5,7 @@
 
 # An example controller showing a sample home page
 GET     /ratingInfo/:movieId                           controllers.RatingsController.ratingInfo(movieId: Int)
+GET     /ratingInfos/:queryParams                      controllers.RatingsController.ratingInfos(queryParams: String)
 
 
 # Map static resources from the /public folder to the /assets URL path
