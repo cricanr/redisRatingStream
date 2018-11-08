@@ -15,7 +15,9 @@ How to run it
 Prerequisites
 
 1) Start dependencies (downstream services) first:
+`docker-compose up`
 
+Install: 
 Linux:
   -  java 
   -  stb
@@ -51,6 +53,8 @@ sudo apt-get update
 apt-cache policy docker-ce
 ```
 
+Running the application:
+Locally (without docker)
 1) Using SBT terminal to prepare the `svc` dir ([click here](https://medium.com/@shatil/play-framework-https-hello-world-with-docker-62963cf26daf)) 
 ```sbtshell
 sbt clean 
@@ -58,8 +62,16 @@ sbt compile
 sbt test
 sbt run
 ```
+
+In docker container: 
+1) Create artifact/package of app: 
 ```sbtshell
-set -x && unzip -d svc target/universal/*-1.0-SNAPSHOT.zip && mv svc/*/* svc/ && rm svc/bin/*.bat && mv svc/bin/* svc/bin/star
+sbt dist
+```
+
+Move package artifact
+```sbtshell
+set -x && unzip -d svc target/universal/*-1.0.zip && mv svc/*/* svc/ && rm svc/bin/*.bat && mv svc/bin/* svc/bin/star
 ```
 
 2) Create .env file based on example .env.dist
@@ -101,11 +113,8 @@ volumes:
 
 ```
 5) Create Dockerfile
-```yaml
-ENV PATH ${PATH}:${SBT_HOME}/bin
+Check `Dockerfile` code
 
-COPY svc /svc
-```
 6) Start dependencies (downstream services) first:
 ```bash
 docker-compose up --force-recreate --build

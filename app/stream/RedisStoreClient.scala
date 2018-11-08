@@ -23,10 +23,8 @@ class RedisStoreClient @Inject()
                                 (implicit configuration: Configuration)
   extends IStoreClient {
   private def getRedisIpParam=  {
-    Option(System.getProperty("redis.ip")).getOrElse("172.28.0.2")
+    Option(System.getProperty("redis.ip")).getOrElse("localhost")
   }
-
-  println(s"param: ${System.getProperty("redis.ip")}")
 
   private val redisClient: RedisClient = new RedisClient(getRedisIpParam, port = 6379)
 

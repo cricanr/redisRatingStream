@@ -9,8 +9,8 @@ ENV SBT_HOME /usr/local/sbt
 ENV PATH ${PATH}:${SBT_HOME}/bin
 
 COPY svc /svc
-#EXPOSE 9000 9443
-#CMD /svc/bin/start -Dhttps.port=9443 -Dplay.crypto.secret=secret
+EXPOSE 9000 9443
+CMD /svc/bin/start -Dhttps.port=9443 -Dplay.crypto.secret=secret
 
 #CMD /svc/bin/start -Dhttps.port=9443 -Dplay.crypto.secret=secret
 #CMD sleep infinity
