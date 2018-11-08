@@ -28,7 +28,3 @@ libraryDependencies ++= Seq( jdbc , ehcache , ws , specs2 % Test , guice,
 )
 
 unmanagedResourceDirectories in Test <+=  baseDirectory ( _ /"target/web/public/test" )
-
-
-//doc:
-//https://github.com/Tapad/sbt-docker-compose/commit/4022a67d3a83441d71994ba14fa4a6139ccc735d#diff-3e4674dca13d884cdb52705d4b2c0f49

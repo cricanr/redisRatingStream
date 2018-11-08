@@ -160,4 +160,4 @@ You can also run and debug using IntelliJ if you want.
 
 Useful link: 
 --------------
-TODO
+https://github.com/Tapad/sbt-docker-compose/commit/4022a67d3a83441d71994ba14fa4a6139ccc735d#diff-3e4674dca13d884cdb52705d4b2c0f49
