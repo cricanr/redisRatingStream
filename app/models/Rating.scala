@@ -7,6 +7,8 @@ case class Rating(id: Int, rating: Float)
 
 case class RatingAverageInfo(ratingAverage: RatingAverage, isBellowMedianAverage: Boolean)
 
+case class RatingStatsInfo(median: Double, ratingAverageInfo: RatingAverageInfo)
+
 case class RatingAverage(id: Int, ratingAverage: Float)
 
 object Rating {
