@@ -71,7 +71,7 @@ sbt dist
 
 Move package artifact
 ```sbtshell
-set -x && unzip -d svc target/universal/*-1.0.zip && mv svc/*/* svc/ && rm svc/bin/*.bat && mv svc/bin/* svc/bin/star
+set -x && unzip -d svc target/universal/*-1.0.zip && mv svc/*/* svc/ && rm svc/bin/*.bat && mv svc/bin/* svc/bin/start
 ```
 
 2) Create .env file based on example .env.dist
