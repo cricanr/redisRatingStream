@@ -11,10 +11,16 @@ services:
       - redis-net
     depends_on:
       - redis
+      - ratingsstream
     ports:
       - 9000:9000
       - 9443:9443
     command: /svc/bin/start -Dhttps.port=9443 -Dredis.ip="$REDIS_IP" -Dplay.crypto.secret=secret
+
+  ratingsstream:
+    image: "keremk/ratingsstream:v0.3"
+    ports:
+    - "3020:3000"
 
   redis:
     image: redis
