@@ -25,3 +25,4 @@ project/boot/
 project/plugins/project/
 .cache
 .lib/
+.env

@@ -1,0 +1,41 @@
+#https://docs.docker.com/compose/compose-file/compose-versioning/
+version: "3.3"
+
+services:
+#  Fix startup of redis-stream at module load time and uncomment to have entire system in docker
+#  app:
+#    build: ./
+#    environment:
+#      - REDIS_HOST=redis
+#      - RHOST=redis
+#    networks:
+#      - redis-net
+#    depends_on:
+#      - redis
+#      - ratingsstream
+#    ports:
+#      - 9000:9000
+#      - 9443:9443
+#    command: /svc/bin/start -Dhttps.port=9443 -Dredis.ip="$REDIS_IP" -Dplay.crypto.secret=secret
+
+  ratingsstream:
+    image: "keremk/ratingsstream:v0.3"
+    ports:
+    - "3020:3000"
+
+  redis:
+    image: redis
+    command: ["redis-server", "--appendonly", "yes"]
+    hostname: redis
+    networks:
+      - redis-net
+    volumes:
+      - redis-data:/data
+    ports:
+      - 6379:6379
+
+networks:
+  redis-net:
+
+volumes:
+  redis-data:
