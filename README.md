@@ -79,20 +79,20 @@ set -x && unzip -d svc target/universal/*-1.0.zip && mv svc/*/* svc/ && rm svc/b
  
 3) Create docker-compose.yml ([click here](https://docs.docker.com/compose/compose-file/compose-versioning/))
 ```yaml
-version: "3.3"
-services:
-  app:
-    build: ./
-    environment:
-      - REDIS_HOST=redis
-      - RHOST=redis
-    networks:
-      - redis-net
-    depends_on:
-      - redis
-    ports:
-      - 9000:9443
-    command: /svc/bin/start -Dhttps.port=9443 -Dredis.ip="$REDIS_IP" -Dplay.crypto.secret=secret
+#version: "3.3"
+#services:
+#  app:
+#    build: ./
+#    environment:
+#      - REDIS_HOST=redis
+#      - RHOST=redis
+#    networks:
+#      - redis-net
+#    depends_on:
+#      - redis
+#    ports:
+#      - 9000:9443
+#    command: /svc/bin/start -Dhttps.port=9443 -Dredis.ip="$REDIS_IP" -Dplay.crypto.secret=secret
 
   redis:
     image: redis
@@ -122,6 +122,18 @@ docker-compose up --force-recreate --build
 --build => will build first
 --force-recreate => will remove cache
 up => docker-compose.yml then Dockerfile
+
+or 
+```
+docker-compose up
+```
+
+Start the Scala play app: (when finished docker integration, this should no longer be needed) 
+```sbtshell
+sbt run
+```
+NOTE: Because a problem with starting redisStream Akka service when Play app is running also in the `docker-compose` environment 
+I have removed it for now from docker-compose and we need to run the Play app separately. To be fixed-forward.
 
 7) Run in Chrome: http://localhost:9000/ratingInfo/364689 (or another movieId) and you should get something like this: 
 ```{

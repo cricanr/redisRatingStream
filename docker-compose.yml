@@ -2,20 +2,21 @@
 version: "3.3"
 
 services:
-  app:
-    build: ./
-    environment:
-      - REDIS_HOST=redis
-      - RHOST=redis
-    networks:
-      - redis-net
-    depends_on:
-      - redis
-      - ratingsstream
-    ports:
-      - 9000:9000
-      - 9443:9443
-    command: /svc/bin/start -Dhttps.port=9443 -Dredis.ip="$REDIS_IP" -Dplay.crypto.secret=secret
+#  Fix startup of redis-stream at module load time and uncomment to have entire system in docker
+#  app:
+#    build: ./
+#    environment:
+#      - REDIS_HOST=redis
+#      - RHOST=redis
+#    networks:
+#      - redis-net
+#    depends_on:
+#      - redis
+#      - ratingsstream
+#    ports:
+#      - 9000:9000
+#      - 9443:9443
+#    command: /svc/bin/start -Dhttps.port=9443 -Dredis.ip="$REDIS_IP" -Dplay.crypto.secret=secret
 
   ratingsstream:
     image: "keremk/ratingsstream:v0.3"
