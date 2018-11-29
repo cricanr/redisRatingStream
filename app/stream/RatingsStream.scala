@@ -13,11 +13,10 @@ import scala.concurrent.ExecutionContext
 import scala.util.Try
 
 @Singleton
-class RatingsStream @Inject()(ws: WSClient,
-                              redisStoreClient: RedisStoreClient)
-                             (implicit ec: ExecutionContext,
-                              mat: Materializer,
-                              configuration: Configuration) {
+class RatingsStream @Inject()(ws: WSClient, redisStoreClient: RedisStoreClient)(
+    implicit ec: ExecutionContext,
+    mat: Materializer,
+    configuration: Configuration) {
 
   private def getUrl: String = {
     val baseUrl = configuration.get[String]("rating.stream.baseUrl")
@@ -35,7 +34,8 @@ class RatingsStream @Inject()(ws: WSClient,
       val sink = Sink.foreach[ByteString] { bytes =>
         val maybeRating = decodeRatingMessage(bytes)
         println(bytes.map(_.toChar).mkString.substring(6))
-        maybeRating.foreach(rating => redisStoreClient.addToAvgSortedSet(rating))
+        maybeRating.foreach(rating =>
+          redisStoreClient.addToAvgSortedSet(rating))
       }
 
       response.bodyAsSource.runWith(sink).andThen {

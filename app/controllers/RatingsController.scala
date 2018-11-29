@@ -7,17 +7,23 @@ import io.circe.generic.auto._
 import io.circe.syntax._
 import javax.inject.Inject
 import models.{RatingInfosRequest, RatingStatsInfo}
-import play.api.mvc.{AbstractController, Action, AnyContent, ControllerComponents}
+import play.api.mvc.{
+  AbstractController,
+  Action,
+  AnyContent,
+  ControllerComponents
+}
 import query.QueryStringHelper
 import stream.{RatingStats, RedisStoreClient}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class RatingsController @Inject()(cc: ControllerComponents,
-                                  actorSystem: ActorSystem,
-                                  ratingStats: RatingStats,
-                                  redisStoreClient: RedisStoreClient)
-                                 (implicit exec: ExecutionContext) extends AbstractController(cc) {
+class RatingsController @Inject()(
+    cc: ControllerComponents,
+    actorSystem: ActorSystem,
+    ratingStats: RatingStats,
+    redisStoreClient: RedisStoreClient)(implicit exec: ExecutionContext)
+    extends AbstractController(cc) {
 
   def ratingInfo(movieId: Int): Action[AnyContent] = Action.async { _ =>
     val ratingAverageInfo = ratingStats.ratingStats(movieId)
@@ -25,24 +31,26 @@ class RatingsController @Inject()(cc: ControllerComponents,
 
     println("ratingAverage: " + ratingAverageInfo.ratingAverage)
     println("median: " + ratingStatInfos.median)
-    println("isBellowMedianAvgRating: " + ratingAverageInfo.isBellowMedianAverage)
+    println(
+      "isBellowMedianAvgRating: " + ratingAverageInfo.isBellowMedianAverage)
     println(s"ratingAverageInfo($movieId): " + ratingAverageInfo)
 
     Future.successful(Ok(ratingAverageInfo.asJson.toString))
   }
 
   def ratingInfos(queryParams: String): Action[AnyContent] = Action.async { _ =>
-
-    val maybeRatingInfosRequest = QueryStringHelper.parseQueryParams(URLDecoder.decode(queryParams, "UTF8"))
-    val ratingAverageInfos = maybeRatingInfosRequest.map { ratingInfoRequest =>
-      val limitedMovieIds = limitMovieIds(ratingInfoRequest)
-      limitedMovieIds.map {
-        movieId =>
+    val maybeRatingInfosRequest =
+      QueryStringHelper.parseQueryParams(URLDecoder.decode(queryParams, "UTF8"))
+    val ratingAverageInfos = maybeRatingInfosRequest
+      .map { ratingInfoRequest =>
+        val limitedMovieIds = limitMovieIds(ratingInfoRequest)
+        limitedMovieIds.map { movieId =>
           val ratingAverageInfo = ratingStats.ratingStats(movieId)
           ratingAverageInfo
-      }
+        }
 
-    }.getOrElse(Seq.empty)
+      }
+      .getOrElse(Seq.empty)
 
     Future.successful(Ok(ratingAverageInfos.asJson.toString))
   }

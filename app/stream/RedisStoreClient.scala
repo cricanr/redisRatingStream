@@ -19,25 +19,35 @@ trait IStoreClient {
 
 // TODO: Add back DI RedisClient, need to configure to use RedisClient with custom constructor (IP, PORT)
 // FOR now using new operator to try it works
-class RedisStoreClient @Inject()
-                                (implicit configuration: Configuration)
-  extends IStoreClient {
-  private def getRedisIpParam=  {
+class RedisStoreClient @Inject()(implicit configuration: Configuration)
+    extends IStoreClient {
+  private def getRedisIpParam = {
     Option(System.getProperty("redis.ip")).getOrElse("localhost")
   }
 
-  private val redisClient: RedisClient = new RedisClient(getRedisIpParam, port = 6379)
+  private val redisClient: RedisClient =
+    new RedisClient(getRedisIpParam, port = 6379)
 
-  private val ratingsRedisSortedList = configuration.get[String]("redis.ratingsSortedList")
+  private val ratingsRedisSortedList =
+    configuration.get[String]("redis.ratingsSortedList")
 
-  private def formatRating(ratingId: Int, rating: Float) = s"""{"id":$ratingId,"rating":$rating}"""
+  private def formatRating(ratingId: Int, rating: Float) =
+    s"""{"id":$ratingId,"rating":$rating}"""
 
-  private def ratingAvgLines(movieId: Int): List[String] = getRatingAvgLines(movieId: Int)
+  private def ratingAvgLines(movieId: Int): List[String] =
+    getRatingAvgLines(movieId: Int)
 
   private def getRatingAvgLines(id: Int): List[String] = {
-    redisClient.zscan(ratingsRedisSortedList, 0, s"""{*id*:$id,*rating*}""", count = 1000000000).flatMap(res => res._2) match {
+    redisClient
+      .zscan(ratingsRedisSortedList,
+             0,
+             s"""{*id*:$id,*rating*}""",
+             count = 1000000000)
+      .flatMap(res => res._2) match {
       case Some(value) =>
-        value.collect { case ratingLine if ratingLine isDefined => ratingLine.get }
+        value.collect {
+          case ratingLine if ratingLine isDefined => ratingLine.get
+        }
       case None =>
         List.empty
     }
@@ -46,9 +56,14 @@ class RedisStoreClient @Inject()
   def ratingAverage(movieId: Int): RatingAverage = {
     val ratingAvgLinesUnfiltered = ratingAvgLines(movieId)
 
-    val maybeRatingsPruned = ratingAvgLinesUnfiltered.collect { case line if line nonEmpty => line.trim }
-    val maybeRating = maybeRatingsPruned.headOption.flatMap(line => decodeRating(line))
-    maybeRating.map(rating => RatingAverage(rating.id, rating.rating)).getOrElse(RatingAverage(movieId, -1))
+    val maybeRatingsPruned = ratingAvgLinesUnfiltered.collect {
+      case line if line nonEmpty => line.trim
+    }
+    val maybeRating =
+      maybeRatingsPruned.headOption.flatMap(line => decodeRating(line))
+    maybeRating
+      .map(rating => RatingAverage(rating.id, rating.rating))
+      .getOrElse(RatingAverage(movieId, -1))
   }
 
   def getMedian: Option[Double] = {
@@ -59,8 +74,12 @@ class RedisStoreClient @Inject()
         val midNextIndex = midIndex + 1
 
         val c = for {
-          mid <- redisClient.zrangeWithScore(ratingsRedisSortedList, midIndex, midIndex)
-          midNext <- redisClient.zrangeWithScore(ratingsRedisSortedList, midNextIndex, midNextIndex)
+          mid <- redisClient.zrangeWithScore(ratingsRedisSortedList,
+                                             midIndex,
+                                             midIndex)
+          midNext <- redisClient.zrangeWithScore(ratingsRedisSortedList,
+                                                 midNextIndex,
+                                                 midNextIndex)
         } yield {
           val maybeFirstMidScore = mid.headOption.map(_._2)
           val maybeNextMidScore = midNext.headOption.map(_._2)
@@ -73,7 +92,10 @@ class RedisStoreClient @Inject()
         c.flatten
       } else {
         val index = (s.toInt + 1) / 2
-        val median = redisClient.zrangeWithScore(ratingsRedisSortedList, index, index).flatMap(rangeWithScore => rangeWithScore.headOption.map(item => item._2))
+        val median = redisClient
+          .zrangeWithScore(ratingsRedisSortedList, index, index)
+          .flatMap(rangeWithScore =>
+            rangeWithScore.headOption.map(item => item._2))
 
         median
       }
@@ -81,27 +103,42 @@ class RedisStoreClient @Inject()
   }
 
   def addToAvgSortedSet(rating: Rating): Unit = {
-    redisClient.zscan(ratingsRedisSortedList, 0, s"""{"id":${rating.id},"rating":*}""").flatMap(a => a._2) match {
+    redisClient
+      .zscan(ratingsRedisSortedList, 0, s"""{"id":${rating.id},"rating":*}""")
+      .flatMap(a => a._2) match {
       case Some(value) =>
         val item = value.collect { case c if c isDefined => c.get }
         if (item.isEmpty)
-          redisClient.zadd(ratingsRedisSortedList, rating.rating, formatRating(rating.id, rating.rating))
+          redisClient.zadd(ratingsRedisSortedList,
+                           rating.rating,
+                           formatRating(rating.id, rating.rating))
         else {
           val maybeExistingRating = Rating.decodeRating(item.head)
-          maybeExistingRating.map { existingRating =>
-            val averageRating = (rating.rating + existingRating.rating) / 2
-            val updatedRating = Rating(existingRating.id, averageRating)
+          maybeExistingRating
+            .map { existingRating =>
+              val averageRating = (rating.rating + existingRating.rating) / 2
+              val updatedRating = Rating(existingRating.id, averageRating)
 
-            redisClient.zrem(ratingsRedisSortedList, item.head)
-            redisClient.zadd(ratingsRedisSortedList, updatedRating.rating, formatRating(rating.id, updatedRating.rating))
+              redisClient.zrem(ratingsRedisSortedList, item.head)
+              redisClient.zadd(ratingsRedisSortedList,
+                               updatedRating.rating,
+                               formatRating(rating.id, updatedRating.rating))
 
-            redisClient.zrangeWithScore(ratingsRedisSortedList, 0, 100, sortAs = new SortOrder {
-              ASC
-            })
-          }.getOrElse(redisClient.zadd(ratingsRedisSortedList, rating.rating, formatRating(rating.id, rating.rating)))
+              redisClient.zrangeWithScore(ratingsRedisSortedList,
+                                          0,
+                                          100,
+                                          sortAs = new SortOrder {
+                                            ASC
+                                          })
+            }
+            .getOrElse(redisClient.zadd(ratingsRedisSortedList,
+                                        rating.rating,
+                                        formatRating(rating.id, rating.rating)))
         }
       case None =>
-        redisClient.zadd(ratingsRedisSortedList, rating.rating, formatRating(rating.id, rating.rating))
+        redisClient.zadd(ratingsRedisSortedList,
+                         rating.rating,
+                         formatRating(rating.id, rating.rating))
     }
   }
 
