@@ -187,3 +187,4 @@ Useful `sbt` commands to run Scalafmt tasks:
 Useful link: 
 --------------
 https://github.com/Tapad/sbt-docker-compose/commit/4022a67d3a83441d71994ba14fa4a6139ccc735d#diff-3e4674dca13d884cdb52705d4b2c0f49
+https://scalameta.org/scalafmt/
