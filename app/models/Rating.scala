@@ -5,7 +5,8 @@ import io.circe.parser.decode
 
 case class Rating(id: Int, rating: Float)
 
-case class RatingAverageInfo(ratingAverage: RatingAverage, isBellowMedianAverage: Boolean)
+case class RatingAverageInfo(ratingAverage: RatingAverage,
+                             isBellowMedianAverage: Boolean)
 
 case class RatingStatsInfo(median: Double, ratingAverageInfo: RatingAverageInfo)
 

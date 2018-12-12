@@ -17,6 +17,7 @@ class RatingStats @Inject()(redisStoreClient: RedisStoreClient) {
   }
 
   def ratingStats(movieId: Int): RatingAverageInfo = {
-    RatingAverageInfo(ratingAverage(movieId), isBellowMedianAverageRating(movieId))
+    RatingAverageInfo(ratingAverage(movieId),
+                      isBellowMedianAverageRating(movieId))
   }
 }

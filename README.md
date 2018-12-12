@@ -164,12 +164,27 @@ Output:
    },
    "isBellowMedianAverage": true
    }
-   ]```
+   ]
+```
    
 Voila! Your app runs correctly!
 
 You can also run and debug using IntelliJ if you want.
 
+Scalafmt:
+--------
+In order to have well formatted, consistent, easy to maintain code approved by Scala community standards I use Scalafmt.
+It is configurable to work within IntelliJ or other IDEs, integrated with your favourite shortcuts and also at build time
+when a file is saved code will be reformatted accordingly.
+Installation documentation:https://github.com/lucidsoftware/neo-sbt-scalafmt
+Useful `sbt` commands to run Scalafmt tasks:
+```sbtshell
+> scalafmt       # format compile sources
+> test:scalafmt  # format test sources
+> sbt:scalafmt   # format .sbt source
+``` 
+
 Useful link: 
 --------------
 https://github.com/Tapad/sbt-docker-compose/commit/4022a67d3a83441d71994ba14fa4a6139ccc735d#diff-3e4674dca13d884cdb52705d4b2c0f49
+https://scalameta.org/scalafmt/
